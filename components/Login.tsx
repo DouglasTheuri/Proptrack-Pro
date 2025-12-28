@@ -26,7 +26,7 @@ const Login: React.FC = () => {
           // @ts-ignore
           google.accounts.id.initialize({
             client_id: clientId,
-            callback: (response: any) => login(response.credential),
+            callback: (response: any) => login(response.credential, authMode === 'signup'),
           });
 
           // @ts-ignore
@@ -35,7 +35,7 @@ const Login: React.FC = () => {
             { 
               theme: "filled_blue", 
               size: "large", 
-              width: 320,
+              width: 340,
               text: authMode === 'signup' ? 'signup_with' : 'signin_with',
               shape: "pill"
             }
@@ -59,118 +59,127 @@ const Login: React.FC = () => {
     return () => clearInterval(interval);
   }, [login, authMode]);
 
-  const features = [
-    { title: "Sheets Automation", desc: "Every transaction syncs instantly to your personal Google Spreadsheet.", icon: "📊" },
-    { title: "AI Portfolio Advisor", desc: "Get real-time insights on rent trends and maintenance needs.", icon: "✨" },
-    { title: "Owner Portal", desc: "Generate transparent payout reports with one click.", icon: "🏢" }
+  const accountBenefits = [
+    { title: "Live Spreadsheet Sync", desc: "Data automatically reflects in your Google Sheets.", icon: "🔄" },
+    { title: "AI Portfolio Analyst", desc: "Ask questions and get insights from Gemini 3.", icon: "🤖" },
+    { title: "Secure Payouts", desc: "Automated owner distribution calculations.", icon: "💵" }
   ];
 
   return (
-    <div className="min-h-screen flex bg-slate-950 text-white font-inter selection:bg-indigo-500/30">
-      {/* Left side: Content & Branding */}
-      <div className="hidden lg:flex flex-1 flex-col p-16 relative overflow-hidden bg-slate-900">
+    <div className="min-h-screen flex bg-slate-950 text-white selection:bg-indigo-500/30 font-sans">
+      {/* Visual Brand Section */}
+      <div className="hidden lg:flex flex-1 flex-col p-16 relative overflow-hidden bg-slate-900 border-r border-white/5">
         <div className="absolute top-0 right-0 w-full h-full opacity-20 pointer-events-none">
-           <div className="absolute top-[-20%] right-[-20%] w-[80%] h-[80%] bg-indigo-600/30 blur-[160px] rounded-full"></div>
-           <div className="absolute bottom-[-20%] left-[-20%] w-[60%] h-[60%] bg-emerald-600/20 blur-[160px] rounded-full"></div>
+           <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] bg-indigo-600/20 blur-[140px] rounded-full"></div>
+           <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[140px] rounded-full"></div>
         </div>
         
-        <div className="relative z-10 flex items-center gap-3 mb-16">
-          <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center font-black text-2xl shadow-xl shadow-indigo-500/20">P</div>
-          <span className="text-2xl font-black tracking-tighter">PROPTRACK PRO</span>
+        <div className="relative z-10 flex items-center gap-4 mb-20">
+          <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center font-black text-3xl shadow-2xl shadow-indigo-500/20 transform -rotate-3">P</div>
+          <span className="text-3xl font-black tracking-tighter">PROPTRACK <span className="text-indigo-400">PRO</span></span>
         </div>
 
-        <div className="relative z-10 mt-auto max-w-xl">
-          <h2 className="text-6xl font-black leading-tight tracking-tighter mb-8">
-            Manage your assets <br/>
-            <span className="text-indigo-400">like a pro.</span>
+        <div className="relative z-10 max-w-xl my-auto">
+          <h2 className="text-7xl font-black leading-[0.95] tracking-tighter mb-10">
+            {authMode === 'signup' ? 'Join the future of ' : 'Return to your '}
+            <span className="text-indigo-400 block mt-2">Property Management.</span>
           </h2>
-          <div className="space-y-8">
-            {features.map((f, i) => (
+          
+          <div className="space-y-10">
+            {accountBenefits.map((benefit, i) => (
               <div key={i} className="flex gap-6 group">
-                <div className="w-14 h-14 shrink-0 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl group-hover:bg-indigo-600/20 transition-colors">
-                  {f.icon}
+                <div className="w-16 h-16 shrink-0 rounded-[22px] bg-white/5 border border-white/10 flex items-center justify-center text-3xl group-hover:bg-indigo-600/30 transition-all duration-300 transform group-hover:scale-110">
+                  {benefit.icon}
                 </div>
                 <div>
-                  <h4 className="font-bold text-lg text-white mb-1">{f.title}</h4>
-                  <p className="text-slate-400 leading-relaxed">{f.desc}</p>
+                  <h4 className="font-bold text-xl text-white mb-2">{benefit.title}</h4>
+                  <p className="text-slate-400 text-lg leading-relaxed">{benefit.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative z-10 mt-auto pt-16 flex gap-8 items-center text-slate-500">
+        <div className="relative z-10 pt-20 flex gap-4 items-center text-slate-500 text-sm font-medium italic">
           <div className="flex -space-x-3">
-            {[1,2,3,4].map(i => (
-              <img key={i} src={`https://i.pravatar.cc/100?u=${i}`} className="w-10 h-10 rounded-full border-2 border-slate-900" />
+            {[23,45,67,89].map(id => (
+              <img key={id} src={`https://i.pravatar.cc/150?u=${id}`} className="w-10 h-10 rounded-full border-2 border-slate-900 ring-2 ring-indigo-500/20" alt="User" />
             ))}
           </div>
-          <p className="text-xs font-medium uppercase tracking-widest">Trusted by 500+ Property Managers</p>
+          <p>Trusted by professional managers worldwide.</p>
         </div>
       </div>
 
-      {/* Right side: Auth Card */}
+      {/* Auth Interaction Section */}
       <div className="flex-1 flex items-center justify-center p-8 bg-slate-950">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center lg:text-left">
-            <h1 className="text-4xl font-black tracking-tight mb-2">
-              {authMode === 'signup' ? 'Create your account' : 'Welcome back'}
+        <div className="w-full max-w-md space-y-10">
+          <div className="text-center">
+            <h1 className="text-5xl font-black tracking-tight mb-4">
+              {authMode === 'signup' ? 'Create Account' : 'Welcome Back'}
             </h1>
-            <p className="text-slate-400 font-medium">
+            <p className="text-slate-400 font-medium text-lg">
               {authMode === 'signup' 
-                ? 'Start managing your portfolio in seconds.' 
-                : 'Enter your credentials to access your dashboard.'}
+                ? 'Sign up with Google to secure your portfolio.' 
+                : 'Sign in to access your properties.'}
             </p>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 space-y-8 backdrop-blur-xl">
+          <div className="bg-white/5 border border-white/10 rounded-[40px] p-10 space-y-10 backdrop-blur-3xl shadow-2xl relative overflow-hidden">
+            {/* Google Auth Button */}
             {isClientMissing ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <button 
                   onClick={loginAsGuest}
-                  className="w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl text-lg font-bold hover:bg-indigo-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-indigo-500/30 flex items-center justify-center gap-3"
+                  className="w-full py-5 px-6 bg-indigo-600 text-white rounded-[20px] text-xl font-bold hover:bg-indigo-700 hover:scale-[1.03] active:scale-[0.98] transition-all shadow-2xl shadow-indigo-500/30 flex items-center justify-center gap-4"
                 >
                   {authMode === 'signup' ? 'Start Free Trial' : 'Sign in as Guest'}
                 </button>
-                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-left">
-                  <p className="text-xs text-amber-200/80 leading-relaxed">
-                    <span className="font-bold text-amber-400 block mb-1 uppercase tracking-widest">Configuration Required</span>
-                    Google Sign-up is disabled because the OAuth Client ID is missing. Using **Demo Mode** will allow you to explore all features instantly.
+                <div className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-[20px]">
+                  <p className="text-sm text-amber-200/90 leading-relaxed text-center font-medium">
+                    <span className="font-black text-amber-400 uppercase tracking-widest text-[10px] block mb-2">Notice</span>
+                    Google authentication is currently in developer preview. Use **Guest Access** to explore the platform without a Client ID.
                   </p>
                 </div>
               </div>
             ) : (
-              <div id="googleBtn" className="flex justify-center py-4">
-                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+              <div id="googleBtn" className="flex justify-center min-h-[60px] items-center">
+                <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
-              <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest text-slate-500"><span className="bg-slate-900 px-4">Secure Authentication</span></div>
+              <div className="relative flex justify-center text-[11px] uppercase font-black tracking-[0.3em] text-slate-500"><span className="bg-slate-900 px-6">Secure Gateway</span></div>
             </div>
 
-            <div className="text-center space-y-4">
-              <p className="text-sm text-slate-400">
-                {authMode === 'signup' ? 'Already have an account?' : 'New to PropTrack?'}
+            <div className="text-center space-y-6">
+              <p className="text-slate-400 font-medium">
+                {authMode === 'signup' ? 'Already using PropTrack?' : 'New to the platform?'}
                 <button 
                   onClick={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
-                  className="ml-2 text-indigo-400 font-bold hover:text-indigo-300 transition-colors"
+                  className="ml-3 text-indigo-400 font-black hover:text-indigo-300 transition-colors underline underline-offset-8 decoration-2 decoration-indigo-500/30"
                 >
                   {authMode === 'signup' ? 'Sign In' : 'Sign Up Free'}
                 </button>
               </p>
               
-              <div className="pt-4">
-                <a 
-                  href="https://ai.google.dev/gemini-api/docs/billing" 
-                  target="_blank" 
-                  className="text-[10px] text-slate-500 hover:text-slate-300 font-medium underline underline-offset-4 uppercase tracking-wider"
-                >
-                  Privacy Policy & Data Terms
-                </a>
+              <div className="pt-6 border-t border-white/5">
+                <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">
+                  Secure OAuth 2.0 Encryption Active
+                </p>
               </div>
             </div>
+          </div>
+
+          <div className="text-center">
+            <a 
+              href="https://ai.google.dev/gemini-api/docs/billing" 
+              target="_blank" 
+              className="text-[11px] text-slate-500 hover:text-indigo-400 font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+            >
+              Terms of Service & Data Policy
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6m4-3h6v6m-11 5L21 3"/></svg>
+            </a>
           </div>
         </div>
       </div>

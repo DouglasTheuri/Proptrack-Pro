@@ -11,7 +11,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (credential: string) => void;
+  login: (credential: string, isSignUp?: boolean) => void;
   loginAsGuest: () => void;
   logout: () => void;
 }
@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = (credential: string) => {
+  const login = (credential: string, isSignUp: boolean = false) => {
     try {
       const base64Url = credential.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -48,7 +48,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       setUser(newUser);
       localStorage.setItem('propTrackUser', JSON.stringify(newUser));
-      // In a real GAS environment, we would also trigger a cloud sync here
+      
+      // If this was a sign up, we could trigger a welcome notification
+      if (isSignUp) {
+        console.log("PropTrack: New User Registered:", newUser.email);
+      }
     } catch (e) {
       console.error("Failed to decode Google Credential", e);
     }
@@ -68,7 +72,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem('propTrackUser');
-    // Force reload to clear any sensitive data in memory
     window.location.reload();
   };
 
