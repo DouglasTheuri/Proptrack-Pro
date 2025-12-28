@@ -8,7 +8,6 @@ const Login: React.FC = () => {
   const { login, loginAsGuest } = useAuth();
   const initialized = useRef(false);
   const [isClientMissing, setIsClientMissing] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
   const [isSimulating, setIsSimulating] = useState(false);
 
   useEffect(() => {
@@ -28,14 +27,14 @@ const Login: React.FC = () => {
             // @ts-ignore
             google.accounts.id.initialize({
               client_id: clientId,
-              callback: (response: any) => login(response.credential, authMode === 'signup'),
+              callback: (response: any) => login(response.credential),
             });
             initialized.current = true;
           }
 
           const btnContainer = document.getElementById("googleBtn");
           if (btnContainer) {
-            btnContainer.innerHTML = ''; // Clear previous button
+            btnContainer.innerHTML = '';
             // @ts-ignore
             google.accounts.id.renderButton(
               btnContainer,
@@ -43,7 +42,7 @@ const Login: React.FC = () => {
                 theme: "filled_blue", 
                 size: "large", 
                 width: 340,
-                text: authMode === 'signup' ? 'signup_with' : 'signin_with',
+                text: 'continue_with',
                 shape: "pill"
               }
             );
@@ -59,17 +58,15 @@ const Login: React.FC = () => {
       // @ts-ignore
       if (typeof google !== 'undefined' && google.accounts) {
         initGoogle();
-        // If client is missing, we stop trying to init real GSI but keep interval for potential script load
         if (isClientMissing) clearInterval(interval);
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [login, authMode, isClientMissing]);
+  }, [login, isClientMissing]);
 
   const handleSimulatedAuth = () => {
     setIsSimulating(true);
-    // Add a slight delay to make the "Sign Up" feel real
     setTimeout(() => {
       loginAsGuest();
       setIsSimulating(false);
@@ -98,8 +95,8 @@ const Login: React.FC = () => {
 
         <div className="relative z-10 max-w-xl my-auto">
           <h2 className="text-7xl font-black leading-[0.95] tracking-tighter mb-10">
-            {authMode === 'signup' ? 'Join the future of ' : 'Return to your '}
-            <span className="text-indigo-400 block mt-2">Property Management.</span>
+            Property Management <br/>
+            <span className="text-indigo-400 block mt-2">Simplified.</span>
           </h2>
           
           <div className="space-y-10">
@@ -132,12 +129,10 @@ const Login: React.FC = () => {
         <div className="w-full max-w-md space-y-10">
           <div className="text-center">
             <h1 className="text-5xl font-black tracking-tight mb-4">
-              {authMode === 'signup' ? 'Create Account' : 'Welcome Back'}
+              Get Started
             </h1>
             <p className="text-slate-400 font-medium text-lg">
-              {authMode === 'signup' 
-                ? 'Sign up with Google to secure your portfolio.' 
-                : 'Sign in to access your properties.'}
+              Link your Google Account to begin managing your portfolio.
             </p>
           </div>
 
@@ -153,16 +148,16 @@ const Login: React.FC = () => {
                   {isSimulating ? (
                     <>
                       <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-                      {authMode === 'signup' ? 'Creating Account...' : 'Signing In...'}
+                      Connecting...
                     </>
                   ) : (
-                    authMode === 'signup' ? 'Sign Up With Google Account' : 'Sign In With Google Account'
+                    'Link with Google Account'
                   )}
                 </button>
                 <div className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-[20px]">
                   <p className="text-sm text-amber-200/90 leading-relaxed text-center font-medium">
                     <span className="font-black text-amber-400 uppercase tracking-widest text-[10px] block mb-2 text-center">Development Preview</span>
-                    OAuth Client ID is not detected. We have enabled **Simulated Google Login** so you can test the full account experience immediately.
+                    OAuth Client ID not detected. Using **Simulated Account** flow for testing purposes.
                   </p>
                 </div>
               </div>
@@ -178,16 +173,6 @@ const Login: React.FC = () => {
             </div>
 
             <div className="text-center space-y-6">
-              <p className="text-slate-400 font-medium">
-                {authMode === 'signup' ? 'Already using PropTrack?' : 'New to the platform?'}
-                <button 
-                  onClick={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
-                  className="ml-3 text-indigo-400 font-black hover:text-indigo-300 transition-colors underline underline-offset-8 decoration-2 decoration-indigo-500/30"
-                >
-                  {authMode === 'signup' ? 'Sign In' : 'Sign Up Free'}
-                </button>
-              </p>
-              
               <div className="pt-6 border-t border-white/5">
                 <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">
                   Secure OAuth 2.0 Encryption Active

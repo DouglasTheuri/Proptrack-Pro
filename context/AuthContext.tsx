@@ -11,7 +11,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (credential: string, isSignUp?: boolean) => void;
+  login: (credential: string) => void;
   loginAsGuest: () => void;
   logout: () => void;
 }
@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = (credential: string, isSignUp: boolean = false) => {
+  const login = (credential: string) => {
     try {
       const base64Url = credential.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -48,11 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       setUser(newUser);
       localStorage.setItem('propTrackUser', JSON.stringify(newUser));
-      
-      // If this was a sign up, we could trigger a welcome notification
-      if (isSignUp) {
-        console.log("PropTrack: New User Registered:", newUser.email);
-      }
+      console.log("PropTrack: User authenticated via Google:", newUser.email);
     } catch (e) {
       console.error("Failed to decode Google Credential", e);
     }
