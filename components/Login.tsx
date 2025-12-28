@@ -8,21 +8,18 @@ const Login: React.FC = () => {
   const { login, loginAsGuest } = useAuth();
   const initialized = useRef(false);
   const [isClientMissing, setIsClientMissing] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
 
   useEffect(() => {
     const initGoogle = () => {
       // @ts-ignore
       if (typeof google !== 'undefined' && google.accounts && !initialized.current) {
-        // Fix for "Property 'includes' does not exist on type 'never'"
-        // Casting to string prevents TypeScript from narrowing unreachable branches to 'never'
         const clientId = CLIENT_ID_PLACEHOLDER as string; 
-        
-        // Reordering the checks ensures .includes is checked against the string before narrowing
         const isPlaceholder = clientId.includes("YOUR_GOOGLE") || clientId === "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
         
         if (isPlaceholder) {
           setIsClientMissing(true);
-          return; // Don't even try if it's the placeholder
+          return;
         }
 
         try {
@@ -35,7 +32,13 @@ const Login: React.FC = () => {
           // @ts-ignore
           google.accounts.id.renderButton(
             document.getElementById("googleBtn"),
-            { theme: "outline", size: "large", width: 280 }
+            { 
+              theme: "filled_blue", 
+              size: "large", 
+              width: 320,
+              text: authMode === 'signup' ? 'signup_with' : 'signin_with',
+              shape: "pill"
+            }
           );
           initialized.current = true;
         } catch (err) {
@@ -54,81 +57,121 @@ const Login: React.FC = () => {
     }, 500);
 
     return () => clearInterval(interval);
-  }, [login]);
+  }, [login, authMode]);
+
+  const features = [
+    { title: "Sheets Automation", desc: "Every transaction syncs instantly to your personal Google Spreadsheet.", icon: "📊" },
+    { title: "AI Portfolio Advisor", desc: "Get real-time insights on rent trends and maintenance needs.", icon: "✨" },
+    { title: "Owner Portal", desc: "Generate transparent payout reports with one click.", icon: "🏢" }
+  ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 relative overflow-hidden">
-      {/* Background Decorative Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/20 blur-[120px] rounded-full"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] rounded-full"></div>
-
-      <div className="max-w-md w-full bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden p-10 space-y-8 animate-in fade-in zoom-in duration-700 border border-white/20 z-10">
-        <div className="text-center">
-          <div className="mx-auto w-20 h-20 bg-indigo-600 rounded-[28px] flex items-center justify-center text-white text-4xl font-bold mb-6 shadow-2xl shadow-indigo-500/40 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
-            P
-          </div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">PropTrack Pro</h1>
-          <p className="text-slate-500 font-medium text-lg">Modern Property Management</p>
+    <div className="min-h-screen flex bg-slate-950 text-white font-inter selection:bg-indigo-500/30">
+      {/* Left side: Content & Branding */}
+      <div className="hidden lg:flex flex-1 flex-col p-16 relative overflow-hidden bg-slate-900">
+        <div className="absolute top-0 right-0 w-full h-full opacity-20 pointer-events-none">
+           <div className="absolute top-[-20%] right-[-20%] w-[80%] h-[80%] bg-indigo-600/30 blur-[160px] rounded-full"></div>
+           <div className="absolute bottom-[-20%] left-[-20%] w-[60%] h-[60%] bg-emerald-600/20 blur-[160px] rounded-full"></div>
+        </div>
+        
+        <div className="relative z-10 flex items-center gap-3 mb-16">
+          <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center font-black text-2xl shadow-xl shadow-indigo-500/20">P</div>
+          <span className="text-2xl font-black tracking-tighter">PROPTRACK PRO</span>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-6 text-center">
+        <div className="relative z-10 mt-auto max-w-xl">
+          <h2 className="text-6xl font-black leading-tight tracking-tighter mb-8">
+            Manage your assets <br/>
+            <span className="text-indigo-400">like a pro.</span>
+          </h2>
+          <div className="space-y-8">
+            {features.map((f, i) => (
+              <div key={i} className="flex gap-6 group">
+                <div className="w-14 h-14 shrink-0 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl group-hover:bg-indigo-600/20 transition-colors">
+                  {f.icon}
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg text-white mb-1">{f.title}</h4>
+                  <p className="text-slate-400 leading-relaxed">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative z-10 mt-auto pt-16 flex gap-8 items-center text-slate-500">
+          <div className="flex -space-x-3">
+            {[1,2,3,4].map(i => (
+              <img key={i} src={`https://i.pravatar.cc/100?u=${i}`} className="w-10 h-10 rounded-full border-2 border-slate-900" />
+            ))}
+          </div>
+          <p className="text-xs font-medium uppercase tracking-widest">Trusted by 500+ Property Managers</p>
+        </div>
+      </div>
+
+      {/* Right side: Auth Card */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-slate-950">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center lg:text-left">
+            <h1 className="text-4xl font-black tracking-tight mb-2">
+              {authMode === 'signup' ? 'Create your account' : 'Welcome back'}
+            </h1>
+            <p className="text-slate-400 font-medium">
+              {authMode === 'signup' 
+                ? 'Start managing your portfolio in seconds.' 
+                : 'Enter your credentials to access your dashboard.'}
+            </p>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 space-y-8 backdrop-blur-xl">
             {isClientMissing ? (
               <div className="space-y-4">
                 <button 
                   onClick={loginAsGuest}
-                  className="w-full py-4 px-6 bg-indigo-600 text-white rounded-xl text-lg font-bold hover:bg-indigo-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-indigo-500/30 flex items-center justify-center gap-3"
+                  className="w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl text-lg font-bold hover:bg-indigo-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-indigo-500/30 flex items-center justify-center gap-3"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  Continue with Demo Data
+                  {authMode === 'signup' ? 'Start Free Trial' : 'Sign in as Guest'}
                 </button>
-                <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl text-left">
-                  <p className="text-xs text-amber-800 leading-relaxed font-medium">
-                    <span className="font-bold block mb-1">Developer Mode Active</span>
-                    The Google OAuth Client ID is not configured yet. Demo mode allows you to preview all features immediately.
+                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-left">
+                  <p className="text-xs text-amber-200/80 leading-relaxed">
+                    <span className="font-bold text-amber-400 block mb-1 uppercase tracking-widest">Configuration Required</span>
+                    Google Sign-up is disabled because the OAuth Client ID is missing. Using **Demo Mode** will allow you to explore all features instantly.
                   </p>
                 </div>
               </div>
             ) : (
-              <div id="googleBtn" className="flex justify-center min-h-[50px] items-center">
-                <div className="text-sm text-slate-400 italic flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                  Waiting for Google...
-                </div>
+              <div id="googleBtn" className="flex justify-center py-4">
+                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
 
-            {!isClientMissing && (
-              <div className="mt-6 flex flex-col gap-3">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
-                  <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest text-slate-400"><span className="bg-slate-50 px-3">or</span></div>
-                </div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
+              <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest text-slate-500"><span className="bg-slate-900 px-4">Secure Authentication</span></div>
+            </div>
 
+            <div className="text-center space-y-4">
+              <p className="text-sm text-slate-400">
+                {authMode === 'signup' ? 'Already have an account?' : 'New to PropTrack?'}
                 <button 
-                  onClick={loginAsGuest}
-                  className="w-full py-3 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
+                  onClick={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
+                  className="ml-2 text-indigo-400 font-bold hover:text-indigo-300 transition-colors"
                 >
-                  Explore as Guest
+                  {authMode === 'signup' ? 'Sign In' : 'Sign Up Free'}
                 </button>
+              </p>
+              
+              <div className="pt-4">
+                <a 
+                  href="https://ai.google.dev/gemini-api/docs/billing" 
+                  target="_blank" 
+                  className="text-[10px] text-slate-500 hover:text-slate-300 font-medium underline underline-offset-4 uppercase tracking-wider"
+                >
+                  Privacy Policy & Data Terms
+                </a>
               </div>
-            )}
-            
-            <p className="text-[11px] text-slate-400 mt-6 leading-relaxed max-w-[240px] mx-auto">
-              Securely syncing with <b>Google Sheets</b> for real-time portfolio management.
-            </p>
+            </div>
           </div>
-        </div>
-
-        <div className="text-center space-y-4">
-          <a 
-            href="https://console.cloud.google.com/" 
-            target="_blank" 
-            className="inline-flex items-center gap-2 text-xs text-indigo-500 hover:text-indigo-700 font-bold transition-colors"
-          >
-            Setup OAuth Client ID
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
-          </a>
         </div>
       </div>
     </div>

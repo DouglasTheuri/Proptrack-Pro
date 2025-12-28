@@ -175,6 +175,21 @@ const AppContent: React.FC = () => {
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0 overflow-auto scroll-smooth">
+        {user.isGuest && (
+          <div className="bg-indigo-600 text-white px-10 py-2.5 flex justify-between items-center text-sm animate-in slide-in-from-top duration-500 relative z-30">
+            <div className="flex items-center gap-2">
+              <span className="font-bold uppercase tracking-widest text-[10px] bg-white/20 px-2 py-0.5 rounded">Guest Session</span>
+              <p className="font-medium">You are currently in demo mode. Data will not be synced to Google Sheets.</p>
+            </div>
+            <button 
+              onClick={logout}
+              className="bg-white text-indigo-600 px-4 py-1 rounded-full font-bold text-xs hover:bg-slate-100 transition-colors shadow-lg"
+            >
+              Link Google Account
+            </button>
+          </div>
+        )}
+        
         <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10 shrink-0 sticky top-0 z-20">
           <div className="flex items-center gap-8">
             <div>
@@ -182,9 +197,9 @@ const AppContent: React.FC = () => {
                 {activeView.replace('-', ' ')}
               </h2>
               <div className="flex items-center gap-2 mt-1">
-                <div className={`w-2 h-2 rounded-full ${syncStatus ? 'bg-amber-400 animate-ping' : 'bg-emerald-500'}`}></div>
+                <div className={`w-2 h-2 rounded-full ${syncStatus ? 'bg-amber-400 animate-ping' : user.isGuest ? 'bg-slate-300' : 'bg-emerald-500'}`}></div>
                 <span className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">
-                  {syncStatus ? 'Syncing to Cloud...' : `Synced: ${user.email}`}
+                  {syncStatus ? 'Syncing to Cloud...' : user.isGuest ? 'Local Cache Only' : `Synced: ${user.email}`}
                 </span>
               </div>
             </div>

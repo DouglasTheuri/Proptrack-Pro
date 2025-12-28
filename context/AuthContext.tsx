@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
@@ -38,14 +39,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }).join(''));
       
       const payload = JSON.parse(jsonPayload);
-      const newUser = {
+      const newUser: User = {
         name: payload.name,
         email: payload.email,
-        picture: payload.picture
+        picture: payload.picture,
+        isGuest: false
       };
       
       setUser(newUser);
       localStorage.setItem('propTrackUser', JSON.stringify(newUser));
+      // In a real GAS environment, we would also trigger a cloud sync here
     } catch (e) {
       console.error("Failed to decode Google Credential", e);
     }
@@ -65,6 +68,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem('propTrackUser');
+    // Force reload to clear any sensitive data in memory
+    window.location.reload();
   };
 
   return (
