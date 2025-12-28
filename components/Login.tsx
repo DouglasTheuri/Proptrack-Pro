@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, width, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const CLIENT_ID_PLACEHOLDER = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
@@ -132,12 +132,12 @@ const Login: React.FC = () => {
                   onClick={loginAsGuest}
                   className="w-full py-5 px-6 bg-indigo-600 text-white rounded-[20px] text-xl font-bold hover:bg-indigo-700 hover:scale-[1.03] active:scale-[0.98] transition-all shadow-2xl shadow-indigo-500/30 flex items-center justify-center gap-4"
                 >
-                  {authMode === 'signup' ? 'Start Free Trial' : 'Sign in as Guest'}
+                  {authMode === 'signup' ? 'Sign Up With Google Account' : 'Sign In With Google Account'}
                 </button>
                 <div className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-[20px]">
                   <p className="text-sm text-amber-200/90 leading-relaxed text-center font-medium">
                     <span className="font-black text-amber-400 uppercase tracking-widest text-[10px] block mb-2">Notice</span>
-                    Google authentication is currently in developer preview. Use **Guest Access** to explore the platform without a Client ID.
+                    Google authentication is currently in developer preview. Use the button above to simulate a **Google Account** flow.
                   </p>
                 </div>
               </div>
