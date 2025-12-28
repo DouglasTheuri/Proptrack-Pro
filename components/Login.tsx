@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, width, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const CLIENT_ID_PLACEHOLDER = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
@@ -9,11 +9,12 @@ const Login: React.FC = () => {
   const initialized = useRef(false);
   const [isClientMissing, setIsClientMissing] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
+  const [isSimulating, setIsSimulating] = useState(false);
 
   useEffect(() => {
     const initGoogle = () => {
       // @ts-ignore
-      if (typeof google !== 'undefined' && google.accounts && !initialized.current) {
+      if (typeof google !== 'undefined' && google.accounts) {
         const clientId = CLIENT_ID_PLACEHOLDER as string; 
         const isPlaceholder = clientId.includes("YOUR_GOOGLE") || clientId === "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
         
@@ -23,24 +24,30 @@ const Login: React.FC = () => {
         }
 
         try {
-          // @ts-ignore
-          google.accounts.id.initialize({
-            client_id: clientId,
-            callback: (response: any) => login(response.credential, authMode === 'signup'),
-          });
+          if (!initialized.current) {
+            // @ts-ignore
+            google.accounts.id.initialize({
+              client_id: clientId,
+              callback: (response: any) => login(response.credential, authMode === 'signup'),
+            });
+            initialized.current = true;
+          }
 
-          // @ts-ignore
-          google.accounts.id.renderButton(
-            document.getElementById("googleBtn"),
-            { 
-              theme: "filled_blue", 
-              size: "large", 
-              width: 340,
-              text: authMode === 'signup' ? 'signup_with' : 'signin_with',
-              shape: "pill"
-            }
-          );
-          initialized.current = true;
+          const btnContainer = document.getElementById("googleBtn");
+          if (btnContainer) {
+            btnContainer.innerHTML = ''; // Clear previous button
+            // @ts-ignore
+            google.accounts.id.renderButton(
+              btnContainer,
+              { 
+                theme: "filled_blue", 
+                size: "large", 
+                width: 340,
+                text: authMode === 'signup' ? 'signup_with' : 'signin_with',
+                shape: "pill"
+              }
+            );
+          }
         } catch (err) {
           console.error("Google Sign-In initialization failed:", err);
         }
@@ -52,12 +59,22 @@ const Login: React.FC = () => {
       // @ts-ignore
       if (typeof google !== 'undefined' && google.accounts) {
         initGoogle();
-        if (initialized.current) clearInterval(interval);
+        // If client is missing, we stop trying to init real GSI but keep interval for potential script load
+        if (isClientMissing) clearInterval(interval);
       }
-    }, 500);
+    }, 1000);
 
     return () => clearInterval(interval);
-  }, [login, authMode]);
+  }, [login, authMode, isClientMissing]);
+
+  const handleSimulatedAuth = () => {
+    setIsSimulating(true);
+    // Add a slight delay to make the "Sign Up" feel real
+    setTimeout(() => {
+      loginAsGuest();
+      setIsSimulating(false);
+    }, 1200);
+  };
 
   const accountBenefits = [
     { title: "Live Spreadsheet Sync", desc: "Data automatically reflects in your Google Sheets.", icon: "🔄" },
@@ -129,15 +146,23 @@ const Login: React.FC = () => {
             {isClientMissing ? (
               <div className="space-y-6">
                 <button 
-                  onClick={loginAsGuest}
-                  className="w-full py-5 px-6 bg-indigo-600 text-white rounded-[20px] text-xl font-bold hover:bg-indigo-700 hover:scale-[1.03] active:scale-[0.98] transition-all shadow-2xl shadow-indigo-500/30 flex items-center justify-center gap-4"
+                  onClick={handleSimulatedAuth}
+                  disabled={isSimulating}
+                  className="w-full py-5 px-6 bg-indigo-600 text-white rounded-[20px] text-xl font-bold hover:bg-indigo-700 hover:scale-[1.03] active:scale-[0.98] transition-all shadow-2xl shadow-indigo-500/30 flex items-center justify-center gap-4 disabled:opacity-70 disabled:cursor-wait"
                 >
-                  {authMode === 'signup' ? 'Sign Up With Google Account' : 'Sign In With Google Account'}
+                  {isSimulating ? (
+                    <>
+                      <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                      {authMode === 'signup' ? 'Creating Account...' : 'Signing In...'}
+                    </>
+                  ) : (
+                    authMode === 'signup' ? 'Sign Up With Google Account' : 'Sign In With Google Account'
+                  )}
                 </button>
                 <div className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-[20px]">
                   <p className="text-sm text-amber-200/90 leading-relaxed text-center font-medium">
-                    <span className="font-black text-amber-400 uppercase tracking-widest text-[10px] block mb-2">Notice</span>
-                    Google authentication is currently in developer preview. Use the button above to simulate a **Google Account** flow.
+                    <span className="font-black text-amber-400 uppercase tracking-widest text-[10px] block mb-2 text-center">Development Preview</span>
+                    OAuth Client ID is not detected. We have enabled **Simulated Google Login** so you can test the full account experience immediately.
                   </p>
                 </div>
               </div>
