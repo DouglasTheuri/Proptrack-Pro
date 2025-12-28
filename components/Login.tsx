@@ -1,19 +1,27 @@
-
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
+const CLIENT_ID_PLACEHOLDER = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+
 const Login: React.FC = () => {
-  const { login } = useAuth();
+  const { login, loginAsGuest } = useAuth();
   const initialized = useRef(false);
+  const [isClientMissing, setIsClientMissing] = useState(false);
 
   useEffect(() => {
     const initGoogle = () => {
       // @ts-ignore
       if (typeof google !== 'undefined' && google.accounts && !initialized.current) {
+        const clientId = CLIENT_ID_PLACEHOLDER; // Change this to your real ID
+        
+        if (clientId === CLIENT_ID_PLACEHOLDER) {
+          setIsClientMissing(true);
+        }
+
         try {
           // @ts-ignore
           google.accounts.id.initialize({
-            client_id: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com", // Replace this with your client ID from Google Cloud Console
+            client_id: clientId,
             callback: (response: any) => login(response.credential),
           });
 
@@ -29,10 +37,7 @@ const Login: React.FC = () => {
       }
     };
 
-    // Check immediately if script is loaded
     initGoogle();
-
-    // Poll for the google object in case the script tag finishes late
     const interval = setInterval(() => {
       // @ts-ignore
       if (typeof google !== 'undefined' && google.accounts) {
@@ -56,23 +61,47 @@ const Login: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-5 text-center">
-            <h2 className="text-sm font-bold text-slate-600 uppercase tracking-widest mb-4">Secure Access</h2>
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-6 text-center">
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Secure Access</h2>
+            
             <div id="googleBtn" className="flex justify-center min-h-[44px]">
               <div className="text-xs text-slate-400 italic flex items-center gap-2">
                 <div className="w-3 h-3 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                 Connecting to Google...
               </div>
             </div>
-            <p className="text-[10px] text-slate-400 mt-4 leading-relaxed">
+
+            <div className="mt-6 flex flex-col gap-3">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+                <div className="relative flex justify-center text-[10px] uppercase"><span className="bg-slate-50 px-2 text-slate-400 font-bold">OR</span></div>
+              </div>
+
+              <button 
+                onClick={loginAsGuest}
+                className="w-full py-2.5 px-4 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm flex items-center justify-center gap-2"
+              >
+                Continue in Demo Mode
+              </button>
+            </div>
+
+            {isClientMissing && (
+              <div className="mt-6 p-3 bg-amber-50 border border-amber-100 rounded-lg text-left">
+                <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
+                  <span className="font-bold">Developer Tip:</span> The Google Sign-In will fail until you provide a valid <code className="bg-amber-100 px-1 rounded">client_id</code> in <code className="bg-amber-100 px-1 rounded">Login.tsx</code>. Use Demo Mode to explore the app now.
+                </p>
+              </div>
+            )}
+            
+            <p className="text-[10px] text-slate-400 mt-6 leading-relaxed">
               By signing in, your data will be securely synced with <b>Google Sheets</b> for transparent management.
             </p>
           </div>
         </div>
 
-        <div className="text-center pt-4 border-t border-slate-50">
-          <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" className="text-xs text-indigo-600 hover:underline font-medium">
-            System Documentation & Payout Policies
+        <div className="text-center pt-2">
+          <a href="https://console.cloud.google.com/" target="_blank" className="text-[10px] text-indigo-400 hover:text-indigo-600 font-medium transition-colors">
+            Setup Google Cloud Project →
           </a>
         </div>
       </div>

@@ -1,16 +1,17 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
   name: string;
   email: string;
   picture: string;
+  isGuest?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (credential: string) => void;
+  loginAsGuest: () => void;
   logout: () => void;
 }
 
@@ -29,7 +30,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (credential: string) => {
-    // Decode JWT from Google (Simplified for demo, usually done with a library)
     try {
       const base64Url = credential.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -51,13 +51,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginAsGuest = () => {
+    const guestUser: User = {
+      name: 'Demo Manager',
+      email: 'demo@proptrack.io',
+      picture: 'https://ui-avatars.com/api/?name=Demo+Manager&background=4f46e5&color=fff',
+      isGuest: true
+    };
+    setUser(guestUser);
+    localStorage.setItem('propTrackUser', JSON.stringify(guestUser));
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('propTrackUser');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, loginAsGuest, logout }}>
       {children}
     </AuthContext.Provider>
   );
