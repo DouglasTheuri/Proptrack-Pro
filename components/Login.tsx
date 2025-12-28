@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,10 +13,16 @@ const Login: React.FC = () => {
     const initGoogle = () => {
       // @ts-ignore
       if (typeof google !== 'undefined' && google.accounts && !initialized.current) {
-        const clientId = CLIENT_ID_PLACEHOLDER; // Change this to your real ID
+        // Fix for "Property 'includes' does not exist on type 'never'"
+        // Casting to string prevents TypeScript from narrowing unreachable branches to 'never'
+        const clientId = CLIENT_ID_PLACEHOLDER as string; 
         
-        if (clientId === CLIENT_ID_PLACEHOLDER) {
+        // Reordering the checks ensures .includes is checked against the string before narrowing
+        const isPlaceholder = clientId.includes("YOUR_GOOGLE") || clientId === "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+        
+        if (isPlaceholder) {
           setIsClientMissing(true);
+          return; // Don't even try if it's the placeholder
         }
 
         try {
@@ -44,64 +51,83 @@ const Login: React.FC = () => {
         initGoogle();
         if (initialized.current) clearInterval(interval);
       }
-    }, 200);
+    }, 500);
 
     return () => clearInterval(interval);
   }, [login]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden p-8 space-y-8 animate-in fade-in zoom-in duration-500">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/20 blur-[120px] rounded-full"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] rounded-full"></div>
+
+      <div className="max-w-md w-full bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden p-10 space-y-8 animate-in fade-in zoom-in duration-700 border border-white/20 z-10">
         <div className="text-center">
-          <div className="mx-auto w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-lg shadow-indigo-500/30">
+          <div className="mx-auto w-20 h-20 bg-indigo-600 rounded-[28px] flex items-center justify-center text-white text-4xl font-bold mb-6 shadow-2xl shadow-indigo-500/40 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
             P
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">PropTrack Pro</h1>
-          <p className="text-slate-500 mt-2 font-medium">Property Management, Simplified.</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">PropTrack Pro</h1>
+          <p className="text-slate-500 font-medium text-lg">Modern Property Management</p>
         </div>
 
         <div className="space-y-6">
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-6 text-center">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Secure Access</h2>
-            
-            <div id="googleBtn" className="flex justify-center min-h-[44px]">
-              <div className="text-xs text-slate-400 italic flex items-center gap-2">
-                <div className="w-3 h-3 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                Connecting to Google...
+          <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-6 text-center">
+            {isClientMissing ? (
+              <div className="space-y-4">
+                <button 
+                  onClick={loginAsGuest}
+                  className="w-full py-4 px-6 bg-indigo-600 text-white rounded-xl text-lg font-bold hover:bg-indigo-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-indigo-500/30 flex items-center justify-center gap-3"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  Continue with Demo Data
+                </button>
+                <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl text-left">
+                  <p className="text-xs text-amber-800 leading-relaxed font-medium">
+                    <span className="font-bold block mb-1">Developer Mode Active</span>
+                    The Google OAuth Client ID is not configured yet. Demo mode allows you to preview all features immediately.
+                  </p>
+                </div>
               </div>
-            </div>
-
-            <div className="mt-6 flex flex-col gap-3">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
-                <div className="relative flex justify-center text-[10px] uppercase"><span className="bg-slate-50 px-2 text-slate-400 font-bold">OR</span></div>
+            ) : (
+              <div id="googleBtn" className="flex justify-center min-h-[50px] items-center">
+                <div className="text-sm text-slate-400 italic flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                  Waiting for Google...
+                </div>
               </div>
+            )}
 
-              <button 
-                onClick={loginAsGuest}
-                className="w-full py-2.5 px-4 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm flex items-center justify-center gap-2"
-              >
-                Continue in Demo Mode
-              </button>
-            </div>
+            {!isClientMissing && (
+              <div className="mt-6 flex flex-col gap-3">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+                  <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest text-slate-400"><span className="bg-slate-50 px-3">or</span></div>
+                </div>
 
-            {isClientMissing && (
-              <div className="mt-6 p-3 bg-amber-50 border border-amber-100 rounded-lg text-left">
-                <p className="text-[10px] text-amber-800 leading-relaxed font-medium">
-                  <span className="font-bold">Developer Tip:</span> The Google Sign-In will fail until you provide a valid <code className="bg-amber-100 px-1 rounded">client_id</code> in <code className="bg-amber-100 px-1 rounded">Login.tsx</code>. Use Demo Mode to explore the app now.
-                </p>
+                <button 
+                  onClick={loginAsGuest}
+                  className="w-full py-3 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
+                >
+                  Explore as Guest
+                </button>
               </div>
             )}
             
-            <p className="text-[10px] text-slate-400 mt-6 leading-relaxed">
-              By signing in, your data will be securely synced with <b>Google Sheets</b> for transparent management.
+            <p className="text-[11px] text-slate-400 mt-6 leading-relaxed max-w-[240px] mx-auto">
+              Securely syncing with <b>Google Sheets</b> for real-time portfolio management.
             </p>
           </div>
         </div>
 
-        <div className="text-center pt-2">
-          <a href="https://console.cloud.google.com/" target="_blank" className="text-[10px] text-indigo-400 hover:text-indigo-600 font-medium transition-colors">
-            Setup Google Cloud Project →
+        <div className="text-center space-y-4">
+          <a 
+            href="https://console.cloud.google.com/" 
+            target="_blank" 
+            className="inline-flex items-center gap-2 text-xs text-indigo-500 hover:text-indigo-700 font-bold transition-colors"
+          >
+            Setup OAuth Client ID
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
           </a>
         </div>
       </div>
